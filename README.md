@@ -1,49 +1,16 @@
 # Reproducible computational environments using containers: Introduction to Singularity
 
-[![Create a Slack Account with us](https://img.shields.io/badge/Create_Slack_Account-The_Carpentries-071159.svg)](https://swc-slack-invite.herokuapp.com/)
+## NeSI notes.
 
-This lesson provides an introduction to the [Singularity container platform](https://github.com/hpcng/singularity).
+Currently holding out some hope that parts of this could be taken upstream.
 
-It covers the basics of using Singularity and creating containers:
+All changes that are not _NeSI Specific_ should go in `upstream-incubator`, any changes specific to NeSI should go into `NeSI specific changes`.
 
- - What is Singularity?
- - Installing/running Singularity on the command line
- - Running containers
- - Creating Singularity images
- - Running an MPI parallel application from a Singularity container
+Make sure that before working on `upstream-incubator` you pull from origin, and before working on `nesi-specific-changes` you pull from `upstream-incubator`
 
-## Contributing
+`gh-pages` should be considered 'production' so will be protected. 
 
-We welcome all contributions to improve the lesson! Maintainers will do their best to help you if you have any
-questions, concerns, or experience any difficulties along the way.
+```
+gh-pages <- nesi-specific-changes <- upstream-compat <= incubator/gh-pages
+```
 
-We'd like to ask you to familiarize yourself with our [Contribution Guide](CONTRIBUTING.md) and have a look at
-the [more detailed guidelines][lesson-example] on proper formatting, ways to render the lesson locally, and even
-how to write new episodes.
-
-Please see the current list of [issues][issues] for ideas for contributing to this
-repository. For making your contribution, we use the GitHub flow, which is
-nicely explained in the chapter [Contributing to a Project](http://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project) in Pro Git
-by Scott Chacon.
-Look for the tag ![good_first_issue](https://img.shields.io/badge/-good%20first%20issue-gold.svg). This indicates that the maintainers will welcome a pull request fixing this issue.
-
-
-## Maintainer(s)
-
-Current maintainers of this lesson are
-
-* [Jeremy Cohen](https://github.com/jcohen02)
-* [Andy Turner](https://github.com/aturner-epcc)
-
-## Authors
-
-A list of contributors to the lesson can be found in [AUTHORS](AUTHORS)
-
-## Citation
-
-To cite this lesson, please consult with [CITATION](CITATION)
-
-[cdh]: https://cdh.carpentries.org
-[community-lessons]: https://carpentries.org/community-lessons
-[lesson-example]: https://carpentries.github.io/lesson-example
-[issues]: https://github.com/carpentries-incubator/singularity-introduction/issues
