@@ -1,5 +1,5 @@
 ---
-title: "Building Apptainer images"
+title: "Building Container Images"
 teaching: 10
 exercises: 25
 questions:
@@ -13,10 +13,9 @@ keypoints:
 - "Existing images from remote registries such as Docker Hub and Singularity Hub can be used as a base for creating new Apptainer images."
 ---
 
+So far you've been able to work with {{ site.software.name }} from your own user account as a non-privileged user. 
 
-## Preparing to use {{ site.software.name }} for building images
-
-So far you've been able to work with {{ site.software.name }} from your own user account as a non-privileged user. This part of the {{ site.software.name }} material requires that you use {{ site.software.name }} in an environment where you have administrative (root) access.
+This part of the {{ site.software.name }} material requires that you use {{ site.software.name }} in an environment where you have administrative (root) access.
 
 There are a couple of different ways to work around this restriction.
 
@@ -31,45 +30,168 @@ There are a couple of different ways to work around this restriction.
 </thead>
 <tbody>
   <tr>
-    <td>Install {{ site.software.name }} locally on a system where you do have administrative access.</td>
+    <td>Install {{ site.software.name }} locally on a system where you do have administrative access (then then copy to HPC).</td>
     <td></td>
-    <td></td>
-    <td>Not possible for many people</td>
+    <td><ul><li>Building a contanier locally first is great for testing.</li></ul></td>
+    <td><ul><li>Not possible for many people.</li><li>Local machine must have same architecture as HPC.</li><li>Container image might be quite large and take a long time to copy.</li></ul></td>
   </tr>
   <tr>
     <td>Build your container from within another container</td>
     <td></td>
-    <td></td>
-    <td>A bit contrived</td>
+    <td><ul><li>No root access required.</li></ul></td>
+    <td><ul>
+    <li>A bit contrived.</li>
+    <li>Requires already having a built container with {{ site.software.name }} installed.</li></ul></td>
   </tr>
   <tr>
     <td>Use a 'remote build service' to build your container</td>
     <td></td>
-    <td></td>
-    <td></td>
+    <td><ul><li>Convenient. Just one command to run.</li></ul></td>
+    <td><ul><li>Requires access to a remote build service.</li><li>Build image must still be downloaded over network.</li>
+    <li>Not currently available for Apptainer</li></ul></td>
   </tr>
   <tr>
-    <td>Simulate root access using the `--fakeroot` feature</td>
+    <td>Simulate root access using the <code>--fakeroot</code> feature</td>
     <td></td>
-    <td></td>
-    <td></td>
+    <td><ul><li>Convenient. Just an added flag.</li></ul></td>
+    <td><ul><li>Not possible with all operating systems. (On NeSI, only our newer nodes with Rocky8 installed have this functionality.)</li></ul></td>
+
   </tr>
 </tbody>
 </table>
 
-We'll focus on the last two options in this part of the course - _Use a 'remote build service' to build your container_ and _Simulate root access using the `--fakeroot` feature_.
+We'll focus on the last option in this part of the course - _Simulate root access using the `--fakeroot` feature_.
+
+## Building container via Slurm
+
+The new Mahuika Extension nodes can be used to build Apptainer containers using the [fakeroot feature](https://apptainer.org/docs/user/main/fakeroot.html). This functionality is only available on these nodes at the moment due to their operating system version.
+
+Since the Mahuika Extension nodes are not directly accessable, you will have to create a slurm script.
+Create a new file called `build.sh` and enter the following.
+
+```
+#!/bin/bash -e
+#SBATCH --job-name=apptainer_build
+#SBATCH --partition=milan
+#SBATCH --time=0-00:15:00
+#SBATCH --mem=4GB
+#SBATCH --cpus-per-task=2
+
+module purge
+module load Apptainer
+
+apptainer build --fakeroot my_container.sif my_container.def
+```
+{: .language-bash}
+
+Submit your new script with,
+The `module purge` command will remove unnecessary modules we may have loaded that would interfere with our build.
+
+```
+{{ site.machine.prompt }} sbatch build.sh
+```
+{: .language-bash}
 
 
-### Remote build
+```
+Submitted batch job 33031078
+```
+{: .output}
 
-What if you need to build an image from a system where you don't have admin privileges, *i.e.* you can't run commands with *sudo*?
+You can check the status of your job using `sacct`
+
+```
+{{ site.machine.prompt }} sacct -X
+```
+{: .language-bash}
+
+```
+JobID           JobName          Alloc     Elapsed     TotalCPU  ReqMem   MaxRSS State      
+--------------- ---------------- ----- ----------- ------------ ------- -------- ---------- 
+33031074        spawner-jupyter+     2    00:27:29     00:00:00      4G          RUNNING    
+33031277        apptainer_build      2    00:00:06     00:00:00      4G          RUNNING    
+```
+{: .output}
+
+Note, the first job shown there is your Jupyter session.
+
+Once the job is finished you should see the built container file `my_container.sif`.
+
+```
+{{ site.machine.prompt }} ls
+```
+{: .language-bash}
+
+```
+apptainer_cache  apptainer_tmp  build.sh  lolcow_latest.sif  my_container.def  my_container.sif  python-3.9.6.sif slurm-33031491.out ubuntu_latest.sif
+```
+{: .output}
+
+Note the slurm output `slurm-33031491.out`, if you don't have `my_container.sif` you will want to check here first.
+
+We can test our new container by running.
+
+```
+module load Apptainer
+./my_container.sif
+```
+{: .language-bash}
+
+
+```
+Hello World! Hello from our custom Apptainer image!
+```
+{: .output}
+
+We can also inspect our new container, confirm everything looks as it should.
+
+```
+{{ site.machine.prompt }} {{ site.software.cmd }} inspect my_container.sif
+```
+{: .language-bash}
+
+```
+org.label-schema.build-arch: amd64
+org.label-schema.build-date: Friday_17_February_2023_11:52:9_NZDT
+org.label-schema.schema-version: 1.0
+org.label-schema.usage.apptainer.version: 1.1.5-dirty
+org.label-schema.usage.singularity.deffile.bootstrap: docker
+org.label-schema.usage.singularity.deffile.from: ubuntu:20.04
+org.opencontainers.image.ref.name: ubuntu
+org.opencontainers.image.version: 20.04
+```
+{: .output}
+
+{{ site.machine.prompt }} {{ site.software.cmd }} inspect ir my_container.sif
+```
+{: .language-bash}
+
+```
+#!/bin/sh
+
+    python3 -c 'print("Hello World! Hello from our custom Apptaine image!")'
+```
+{: .output}
+
+### Known limitations
+
+This method, ( i.e using fakeroot), is known to **not** work for all types of Apptainer/Singularity containers.
+
+If your container uses RPM to install packages, i.e. is based on CentOS or Rocky Linux, you need to disable the `APPTAINER_TMPDIR` environment variable (use `unset APPTAINER_TMPDIR`) and request more memory for your Slurm job. Otherwise, RPM will crash due to an incompatibility with the `nobackup` filesystem.
+
+## Remote build
+
+> ## Apptainer remote builder
+>
+> Currently there are no freely available remote builders for Apptainer.
+{: .callout}
 
 {{ site.software.name }} offers the option to run build remotely, using a **Remote Builder** we will be using the default provided by Sylabs; You will need a Sylabs account and a token to use this feature.
 
 ```
-{{ site.machine.prompt }}{{ site.software.cmd }} remote login
+{{ site.machine.prompt }} {{ site.software.cmd }} remote login
 ```
-{: .bash}
+{: .language-bash}
 
 ```
 Generate an API Key at https://cloud.sylabs.io/auth/tokens, and paste here:
@@ -89,7 +211,7 @@ With this set up, you may use `{{ site.software.cmd }} build -r` to start the re
 ```
 {{ site.machine.prompt }} {{ site.software.cmd }} build -r lolcow_remote.sif lolcow.def
 ```
-{: .bash}
+{: .language-bash}
 
 ```
 INFO:    Remote "default" added.
@@ -118,7 +240,7 @@ You are now ready to push your image to the Cloud Library, *e.g.* via `{{ site.s
 ```
 {{ site.machine.prompt }} {{ site.software.cmd }} push -U lolcow.sif library://<YOUR-SYLABS-USERNAME>/default/lolcow:30oct19
 ```
-{: .bash}
+{: .language-bash}
 
 ```
 WARNING: Skipping container verifying
@@ -134,9 +256,9 @@ Finally, you (or other peers) are now able to pull your image from the Cloud Lib
 ```
 {{ site.machine.prompt }} {{ site.software.cmd }} pull -U library://<YOUR-SYLABS-USERNAME>/default/lolcow:30oct19
 ```
-{: .bash}
+{: .language-bash}
 
-```bash
+```
 INFO:    Downloading library image
  67.07 MiB / 67.07 MiB [===================================================================================================================================] 100.00% 8.10 MiB/s 8s
 WARNING: Skipping container verification
@@ -144,79 +266,6 @@ INFO:    Download complete: lolcow_30oct19.sif
 ```
 {: .output}
 
-> ### Service Status
-> 
-> Mahuika's new nodes are in an **Early Access Programme (EAP) phase** and not fully in production.
-> 
-> See [Mahuika Extension Onboarding](/hc/en-gb/articles/5002335382543) for more information about it.
-
-This article describes a technique to build [Apptainer](https://apptainer.org/) containers using Mahuika Extension nodes, via a Slurm job. You can also build [Singularity](/hc/en-gb/articles/360001107916) container using this technique.
-
-## Build Environment Variables
-
-To build containers, you need to ensure that Apptainer has enough storage space to create intermediate files. It also requires a cache folder to save images pulled from a different location (e.g. DockerHub). By default both of these locations are set to `/tmp` which has limited space, large builds may exceed this limitation causing the builder to crash.
-
-The environment variables `APPTAINER_TMPDIR` and `APPTAINER_CACHEDIR` environment can be used to overwrite the default location of these directories.
-
-```bash
-export APPTAINER_CACHEDIR=/nesi/nobackup/PROJECTID/apptainer_cache
-export APPTAINER_TMPDIR=/nesi/nobackup/PROJECTID/apptainer_tmpdir
-mkdir -p $APPTAINER_CACHEDIR $APPTAINER_TMPDIR
-setfacl -b $APPTAINER_TMPDIR
-```
-
-where `PROJECTID` is your NeSI project ID.
-
-## Building container via Slurm
-
-The new Mahuika Extension nodes can be used to build Apptainer containers using the [fakeroot feature](https://apptainer.org/docs/user/main/fakeroot.html). This functionality is only available on these nodes at the moment due to their operating system version.
-
-To illustrate this functionality, create an example container definition file `my_container.def` from a shell session on NeSI as follows:
-
-```bash
-cat << EOF > my_container.def
-BootStrap: docker
-From: ubuntu:20.04
-%post
-    apt-get -y update
-    apt-get install -y wget
-EOF
-```
-
-Then, from a Mahuika login node, you can build the container using the `srun` command as follows:
-
-```bash
-module load Apptainer
-module unload XALT
-srun -p milan --time 0-00:30:00 --mem 4GB --cpus-per-task 2 apptainer build --fakeroot my_container.sif my_container.def
-```
-
-This command will start an interactive Slurm job for 30 minutes using 2 cores and 4 GB of memory to build the image. Make sure to set these resources correctly, some containers can take hours to build and require tens of GB of memory.
-
-If you need more resources to build your container, please consider submitting your job using a Slurm submission script, for example:
-
-```bash
-#!/bin/bash -e
-#SBATCH --job-name=apptainer_build
-#SBATCH --partition=milan
-#SBATCH --time=0-00:30:00
-#SBATCH --mem=4GB
-#SBATCH --cpus-per-task=2
-
-module load Apptainer
-module unload XALT
-
-apptainer build --fakeroot my_container.sif my_container.def
-```
-
-# Known limitations
-
-If your container uses RPM to install packages, i.e. is based on CentOS or Rocky Linux, you need to disable the `APPTAINER_TMPDIR` environment variable (use `unset APPTAINER_TMPDIR`) and request more memory for your Slurm job. Otherwise, RPM will crash due to an incompatibility with the `nobackup` filesystem.
-
-> ### Other limitations
-> 
-> This method, using fakeroot, is known to **not** work for all types of Apptainer/Singularity containers.
-> 
 <!-- ### Other build options -->
 
 <!-- The def file specification has a number of other interesting features, to know more about them you can visit the [Sylabs docs on def files](https://sylabs.io/guides/3.3/user-guide/definition_files.html).
