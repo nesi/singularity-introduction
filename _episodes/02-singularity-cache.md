@@ -126,4 +126,6 @@ echo "export {{ site.software.name | upcase }}_CACHEDIR=/nesi/nobackup/PROJECTID
 echo "export {{ site.software.name | upcase }}_TMPDIR=/nesi/nobackup/PROJECTID/{{ site.software.cmd }}_tmp" >> $HOME/.bashrc
 ```
 
-The `.bashrc` file is read each time you login, ensuring your {{ site.software.name }} environment variables are set.
+You will replace PROJECTID with the project number you are provided from NeSI.  Project IDs are prefixed with an Institution, such as `scion`, `landcare` or `uoo` followed by a unique 5 digit number.  For example {{ site.sched.project }} is one of NeSI's training projects.
+
+The above commands append (`>>`) the quoted string to your `.bashrc`file, which is your personal shell configuration file.  The `.bashrc` file is read each time you login, ensuring your {{ site.software.name }} environment variables are set.

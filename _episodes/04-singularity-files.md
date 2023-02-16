@@ -84,6 +84,7 @@ Host system:                                                      {{ site.softwa
 > system. Lets try anyway,
 >
 > ```
+> {{ site.machine.prompt }} touch /bin/somefile
 > ```
 > {: .language-bash}
 >
@@ -126,7 +127,7 @@ You will sometimes need to bind additional host system directories into a contai
 The `-B` or `--bind` option to the `{{ site.software.cmd }}` command is used to specify additonal binds. Lets try binding the `{{ site.machine.working_dir }}` directory.
 
 ```
-{{ site.machine.prompt }} {{ site.software.cmd }} shell -B {{ site.machine.working_dir }}/shared lolcow_latest.sif
+{{ site.machine.prompt }} {{ site.software.cmd }} shell -B {{ site.machine.working_dir }} lolcow_latest.sif
 {{ site.software.prompt }} ls {{ site.machine.working_dir }}
 ```
 {: .language-bash}
@@ -139,8 +140,8 @@ some stuff in here
 Note that, by default, a bind is mounted at the same path in the container as on the host system. You can also specify where a host directory is mounted in the container by separating the host path from the container path by a colon (`:`) in the option:
 
 ```
-{{ site.machine.prompt }} {{ site.software.cmd }}  shell -B {{ site.machine.working_dir }}:/shared lolcow_latest.sif
-{{ site.software.prompt }} ls /shared
+{{ site.machine.prompt }} {{ site.software.cmd }}  shell -B {{ site.machine.working_dir }}:/nesi99991 lolcow_latest.sif
+{{ site.software.prompt }} ls /nesi99991
 ```
 {: .language-bash}
 
@@ -156,19 +157,7 @@ If you need to mount multiple directories, you can either repeat the `-B` flag m
 ```
 {: .language-bash}
 
-You can also copy data into a container image at build time if there is some static data required in the image. We cover this later in the section on building {{ site.software.name }} containers.
-
-```
-{{ site.machine.prompt }} {{ site.software.cmd }} exec -B {{ site.machine.working_dir }} lolcow_latest.sif ls -Fh {{ site.machine.working_dir }}$USER
-```
-{: .language-bash}
-
-```
-apptainer_cache  apptainer_tmp  lolcow_latest.sif  ubuntu_latest.sif
-```
-{: .output}
-
-Also, we can write files in a host dir which has been bind mounted in the container:
+We can also write files in a host dir which has been bind mounted in the container:
 
 ```
 {{ site.machine.prompt }} {{ site.software.cmd }} exec -B {{ site.machine.working_dir }} lolcow_latest.sif touch {{ site.machine.working_dir }}$USER/my_example_file
@@ -272,7 +261,7 @@ mondo
 > ## Consistency in your containers
 >
 > If your container is not behaving as expected, a good place to start is adding the `--containall` flag, as an unexpected
-> enviroment variable or bind mount may be the cause.
+> environment variable or bind mount may be the cause.
 {: .callout}
 
 \[1\] Gregory M. Kurzer, Containers for Science, Reproducibility and Mobility: {{ site.software.name }}  P2. Intel HPC Developer Conference, 2017. Available at: https://www.intel.com/content/dam/www/public/us/en/documents/presentation/hpc-containers-singularity-advanced.pdf
