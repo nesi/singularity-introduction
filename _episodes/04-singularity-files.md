@@ -113,7 +113,7 @@ This tells us quite a lot about how the container is operating.
 >
 > 1. Try to create a file in the root directory, `touch /bin/somefile`. Is that what you expected would happen?
 > 
-> 2. In in your home directory, run the same command `touch ~/somefile`. Why does it work here? What happens to it when
+> 2. In in your home directory, run the same command `touch ~/somefile`. Why does it work here? What happens to to the file when
 > you exit the container?
 >
 > 3. Some of the files in the root directory are owned by you. Why might this be?
