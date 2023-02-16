@@ -68,7 +68,7 @@ A number of tools are available to create, deploy and run containerised applicat
 
 #### Docker
 
-![Docker Logo](/fig/logo_docker.png){: height="50" style="float:left;display:inline-block;margin:0 10px 0 0"}
+![Docker Logo]({{ page.root }}/fig/logo_docker.png){: height="50" style="float:left;display:inline-block;margin:0 10px 0 0"}
 
 The first engine to gain popularity, still widely used in the IT industry.  Not very suitable for HPC as it requires *root* privileges to run.
 
@@ -76,7 +76,7 @@ See the [documentation](https://docs.docker.com/) for more information.
 
 #### Singularity
 
-![Singularity Logo](/fig/logo_singularity.png){: height="50" style="float:left;display:inline-block;margin:0 10px 0 0"}
+![Singularity Logo]({{ page.root }}/fig/logo_singularity.png){: height="50" style="float:left;display:inline-block;margin:0 10px 0 0"}
 
 A simple, powerful *root*-less container engine for the HPC world. Originally developed at the Lawrence Berkeley National Laboratory.
 
@@ -84,7 +84,7 @@ See the [documentation](https://sylabs.io/guides/latest/user-guide/) for more in
 
 #### Apptainer  
 
-![Apptainer Logo](/fig/logo_apptainer.png){: height="50" style="float:left;display:inline-block;margin:0 10px 0 0"}
+![Apptainer Logo]({{ page.root }}/fig/logo_apptainer.png){: height="50" style="float:left;display:inline-block;margin:0 10px 0 0"}
 
 An open-source fork of **Singularity**. Extends the functionality of **Singularity** and moving forward will likely become the open-source standard.
 
