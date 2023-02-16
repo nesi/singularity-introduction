@@ -51,7 +51,7 @@ There is a default configuration of which files and directories are bound into t
 
 One directory that is likely to be accessible within a container that you start is your _home directory_.  You may also find that the directory from which you issued the `{{ site.software.cmd }}` command (the _current working directory_) is also mapped.
 
-The mapping of file content and directories from a host system into a {{ site.software.name }}  container is illustrated in the example below showing a subset of the directories on the host Linux system and in a {{ site.software.name }}  container:
+The mapping of file content and directories from a host system into a {{ site.software.name }} container is illustrated in the example below showing a subset of the directories on the host Linux system and in a {{ site.software.name }}  container:
 
 ```
 Host system:                                                      {{ site.software.name}}  container:
@@ -71,31 +71,49 @@ Host system:                                                      {{ site.softwa
 ```
 {: .output}
 
+
+Now lets have a look at the permissions inside the containers root directory with the command
+
+ ```
+{{ site.software.prompt }} ls -l /
+```
+{: .language-bash}
+
+```
+total 8
+lrwxrwxrwx   1 root    root       7 Jul 23  2021 bin -> usr/bin
+drwxr-xr-x   2 root    root       3 Apr 15  2020 boot
+drwxr-xr-x  23 root    root    9020 Dec  9 10:32 dev
+lrwxrwxrwx   1 root    root      36 Feb 16 23:26 environment -> .singularity.d/env/90-environment.sh
+drwxr-xr-x   1 cwal219 cwal219   60 Feb 16 23:35 etc
+drwxr-xr-x   1 cwal219 cwal219   60 Feb 16 23:35 home
+lrwxrwxrwx   1 root    root       7 Jul 23  2021 lib -> usr/lib
+lrwxrwxrwx   1 root    root       9 Jul 23  2021 lib32 -> usr/lib32
+lrwxrwxrwx   1 root    root       9 Jul 23  2021 lib64 -> usr/lib64
+lrwxrwxrwx   1 root    root      10 Jul 23  2021 libx32 -> usr/libx32
+drwxr-xr-x   2 root    root       3 Jul 23  2021 media
+drwxr-xr-x   2 root    root       3 Jul 23  2021 mnt
+drwxr-xr-x   2 root    root       3 Jul 23  2021 opt
+dr-xr-xr-x 954 root    root       0 Nov 20 19:48 proc
+drwx------   2 root    root      46 Jul 23  2021 root
+drwxr-xr-x   5 root    root      67 Jul 23  2021 run
+lrwxrwxrwx   1 root    root       8 Jul 23  2021 sbin -> usr/sbin
+lrwxrwxrwx   1 root    root      24 Feb 16 23:26 singularity -> .singularity.d/runscript
+drwxr-xr-x   2 root    root       3 Jul 23  2021 srv
+dr-xr-xr-x  13 root    root       0 Nov 20 19:49 sys
+drwxrwxrwt  28 root    root    4096 Feb 16 23:35 tmp
+drwxr-xr-x  13 root    root     178 Jul 23  2021 usr
+drwxr-xr-x  11 root    root     160 Jul 23  2021 var
+```
+{: .output}
+
+This tells us quite a lot about how the container is operating.
+
 > ## Files in {{ site.software.name }} containers
 >
-> Now lets have a look at the permissions inside the containers root directory with the command
->
-> ```
-> {{ site.machine.prompt }} ls -l /
-> ```
-> {: .language-bash}
-> 
-> We see (most) of the directories here are owned by `root` so we would not expect to be able to create files here, same as on the host
-> system. Lets try anyway,
->
-> ```
-> {{ site.machine.prompt }} touch /bin/somefile
-> ```
-> {: .language-bash}
->
-> ```
-> touch: cannot touch '/bin/somefile': Read-only file system
-> ```
-> {: .output}
->
 > 1. Try to create a file in the root directory, `touch /bin/somefile`. Is that what you expected would happen?
->
-> 2. In in your home directory, run the same command `touch ~/somefile`. Why does it work here? What happens to it when
+> 
+> 2. In in your home directory, run the same command `touch ~/somefile`. Why does it work here? What happens to to the file when
 > you exit the container?
 >
 > 3. Some of the files in the root directory are owned by you. Why might this be?
@@ -110,7 +128,7 @@ Host system:                                                      {{ site.softwa
 > >
 > > 2. Within your home directory, you _should_ be able to successfully create a file. Since you're seeing your home directory on the host system which has been bound into the container, when you exit and the container shuts down, the file that you created within the container should still be present when you look at your home directory on the host system.
 > >
-> > 3. Elaborate on other default binds? `/etc/groups` etc.?
+> > 3. Elaborate on other default binds? `/etc/groups` etc?
 > >
 > > 4. If you try to run the command `nano` you will get the error `bash: nano: command not found`. This is because nano is not
 > > installed in the container, the `touch` command however is a core util so will almost always be available.
@@ -124,11 +142,11 @@ You will sometimes need to bind additional host system directories into a contai
 - There may be a shared dataset in a shard location that you need access to in the container
 - You may require executables and software libraries in the container
 
-The `-B` or `--bind` option to the `{{ site.software.cmd }}` command is used to specify additonal binds. Lets try binding the `{{ site.machine.working_dir }}` directory.
+The `-B` or `--bind` option to the `{{ site.software.cmd }}` command is used to specify additonal binds. Lets try binding the `{{ site.machine.working_dir }}/shared` directory.
 
 ```
-{{ site.machine.prompt }} {{ site.software.cmd }} shell -B {{ site.machine.working_dir }} lolcow_latest.sif
-{{ site.software.prompt }} ls {{ site.machine.working_dir }}
+{{ site.machine.prompt }} {{ site.software.cmd }} shell -B {{ site.machine.working_dir }}/shared lolcow_latest.sif
+{{ site.software.prompt }} ls {{ site.machine.working_dir }}/shared
 ```
 {: .language-bash}
 
@@ -140,7 +158,7 @@ some stuff in here
 Note that, by default, a bind is mounted at the same path in the container as on the host system. You can also specify where a host directory is mounted in the container by separating the host path from the container path by a colon (`:`) in the option:
 
 ```
-{{ site.machine.prompt }} {{ site.software.cmd }}  shell -B {{ site.machine.working_dir }}:/nesi99991 lolcow_latest.sif
+{{ site.machine.prompt }} {{ site.software.cmd }}  shell -B {{ site.machine.working_dir }}/shared:/nesi99991 lolcow_latest.sif
 {{ site.software.prompt }} ls /nesi99991
 ```
 {: .language-bash}
@@ -157,20 +175,7 @@ If you need to mount multiple directories, you can either repeat the `-B` flag m
 ```
 {: .language-bash}
 
-We can also write files in a host dir which has been bind mounted in the container:
-
-```
-{{ site.machine.prompt }} {{ site.software.cmd }} exec -B {{ site.machine.working_dir }} lolcow_latest.sif touch {{ site.machine.working_dir }}$USER/my_example_file
-{{ site.machine.prompt }} ls {{ site.machine.working_dir }}$USER/my_example_file
-```
-{: .language-bash}
-
-```
-{{ site.machine.working_dir }}$USER/my_example_file
-```
-{: .output}
-
-Equivalently, directories to be bind mounted can be specified using the environment variable `{{ site.software.name | upcase }}_BINDPATH`:
+Directories to be bind mounted can be also specified using the environment variable `{{ site.software.name | upcase }}_BINDPATH`:
 
 ```
 {{ site.machine.prompt }} export {{ site.software.name | upcase }}_BINDPATH="dir1,dir2,dir3"
@@ -208,7 +213,7 @@ By default, shell variables are inherited in the container from the host:
 
 ```
 {{ site.machine.prompt }} export HELLO=world
-{{ site.machine.prompt }} {{ site.software.cmd }}  exec lolcow_latest.sif bash -c 'echo $HELLO'
+{{ site.machine.prompt }} {{ site.software.cmd }} exec lolcow_latest.sif bash -c 'echo $HELLO'
 ```
 {: .language-bash}
 
@@ -222,7 +227,7 @@ There might be situations where you want to isolate the shell environment of the
 
 ```
 {{ site.machine.prompt }} export HELLO=world
-{{ site.machine.prompt }} {{ site.software.cmd }}  exec -C lolcow_latest.sif bash -c 'echo $HELLO'
+{{ site.machine.prompt }} {{ site.software.cmd }} exec -C lolcow_latest.sif bash -c 'echo $HELLO'
 ```
 {: .language-bash}
 
@@ -246,7 +251,7 @@ mondo
 ```
 {: .output}
 
-An alternative way to define variables is to use the flag `--env`:
+<!-- An alternative way to define variables is to use the flag `--env`:
 
 ```
 {{ site.machine.prompt }} {{ site.software.cmd }} exec --env CIAO=mondo lolcow_latest.sif bash -c 'echo $CIAO'
@@ -256,12 +261,10 @@ An alternative way to define variables is to use the flag `--env`:
 ```
 mondo
 ```
-{: .output}
+{: .output} -->
 
 > ## Consistency in your containers
 >
 > If your container is not behaving as expected, a good place to start is adding the `--containall` flag, as an unexpected
 > environment variable or bind mount may be the cause.
 {: .callout}
-
-\[1\] Gregory M. Kurzer, Containers for Science, Reproducibility and Mobility: {{ site.software.name }}  P2. Intel HPC Developer Conference, 2017. Available at: https://www.intel.com/content/dam/www/public/us/en/documents/presentation/hpc-containers-singularity-advanced.pdf
