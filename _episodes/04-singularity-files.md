@@ -232,7 +232,7 @@ There might be situations where you want to isolate the shell environment of the
 {: .language-bash}
 
 ```
-HELLO
+ 
 ```
 {: .output}
 
