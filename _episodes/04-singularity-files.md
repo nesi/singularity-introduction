@@ -208,7 +208,7 @@ By default, shell variables are inherited in the container from the host:
 
 ```
 {{ site.machine.prompt }} export HELLO=world
-{{ site.machine.prompt }} {{ site.software.cmd }}  exec lolcow_latest.sif bash -c 'echo $HELLO'
+{{ site.machine.prompt }} {{ site.software.cmd }} exec lolcow_latest.sif bash -c 'echo $HELLO'
 ```
 {: .language-bash}
 
@@ -227,7 +227,7 @@ There might be situations where you want to isolate the shell environment of the
 {: .language-bash}
 
 ```
-HELLO
+ 
 ```
 {: .output}
 
