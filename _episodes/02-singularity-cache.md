@@ -124,6 +124,9 @@ When you want to setup an {{ site.software.name }} environment for your own proj
 ```
 echo "export {{ site.software.name | upcase }}_CACHEDIR=/nesi/nobackup/PROJECTID/{{ site.software.cmd }}_cache" >> $HOME/.bashrc
 echo "export {{ site.software.name | upcase }}_TMPDIR=/nesi/nobackup/PROJECTID/{{ site.software.cmd }}_tmp" >> $HOME/.bashrc
+mkdir -p {{ site.software.name | upcase }}_TMPDIR=/nesi/nobackup/PROJECTID/{{ site.software.cmd }}_tmp 
+mkdir -p {{ site.software.name | upcase }}_CACHEDIR=/nesi/nobackup/PROJECTID/{{ site.software.cmd }}_cache
+setfacl -b {{ site.software.name | upcase }}_TMPDIR=/nesi/nobackup/PROJECTID/{{ site.software.cmd }}_tmp
 ```
 
 You will replace PROJECTID with the project number you are provided from NeSI.  Project IDs are prefixed with an Institution, such as `scion`, `landcare` or `uoo` followed by a unique 5 digit number.  For example {{ site.sched.project }} is one of NeSI's training projects.
